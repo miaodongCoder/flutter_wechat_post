@@ -1,2 +1,2 @@
-# fluter_wechat_post
+# flutter_wechat_post
 用Flutter实现微信朋友圈的一些基本功能
