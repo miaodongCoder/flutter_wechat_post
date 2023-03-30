@@ -86,7 +86,7 @@ class _PostEditPageState extends State<PostEditPage> {
 
         // 拿到图片:
         setState(() {
-          selectedAssets = assets ?? [];
+          selectedAssets = assets?.toList() ?? [];
         });
       },
       child: Container(
