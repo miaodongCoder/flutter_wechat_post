@@ -1,5 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.flutter_wechat_post">
+    <user-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <user-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <user-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+    <user-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <user-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <user-permission android:name="android.permission.READ_MEDIA_AUDIO" />
    <application
         android:label="flutter_wechat_post"
         android:name="${applicationName}"
