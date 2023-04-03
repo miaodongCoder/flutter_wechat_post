@@ -17,6 +17,10 @@ class _PostEditPageState extends State<PostEditPage> {
   bool isDragNow = false;
   // 是否将要删除:
   bool isWillRemove = false;
+  // 是否将要排序:
+  bool isWillOrder = false;
+  // 被拖拽到的 target id:
+  String targetId = "";
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +40,6 @@ class _PostEditPageState extends State<PostEditPage> {
       children: [
         // 九宫格图片列表:
         _buildPhotoList(),
-        // if (isDragNow) _buildRemoveBar() else const SizedBox.shrink(),
       ],
     );
   }
@@ -47,7 +50,8 @@ class _PostEditPageState extends State<PostEditPage> {
       padding: const EdgeInsets.all(spacing),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          final double width = (constraints.maxWidth - spacing * 2) / 3;
+          final double width =
+              (constraints.maxWidth - spacing * 2 - imagePadding * 2 * 3) / 3;
           return Wrap(
             spacing: spacing,
             runSpacing: spacing,
@@ -74,9 +78,11 @@ class _PostEditPageState extends State<PostEditPage> {
           isDragNow = true;
         });
       },
+      // 当可拖动对象被放下时:
       onDragEnd: (details) {
         setState(() {
           isDragNow = false;
+          isWillOrder = false;
         });
       },
       // 被dragTarget对象接收:
@@ -90,43 +96,88 @@ class _PostEditPageState extends State<PostEditPage> {
       // 拖拽的时候显示在指针下方的小组件:
       feedback: _getImageItem(asset, width),
       // 拖拽的时候原位置的图片样式:
-      childWhenDragging: _getImageItem(asset, width,
-          opacity: const AlwaysStoppedAnimation(.2)),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return GalleryWidget(
-                  initialindex: selectedAssets.indexOf(asset),
-                  items: selectedAssets,
-                  isBarVisible: false,
-                );
-              },
-            ),
+      childWhenDragging: _getImageItem(
+        asset,
+        width,
+        opacity: const AlwaysStoppedAnimation(.2),
+      ),
+      child: DragTarget(
+        builder: (context, candidateData, rejectedData) {
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return GalleryWidget(
+                      initialindex: selectedAssets.indexOf(asset),
+                      items: selectedAssets,
+                      isBarVisible: false,
+                    );
+                  },
+                ),
+              );
+            },
+            child: _getImageItem(asset, width),
           );
         },
-        child: _getImageItem(asset, width),
+        // 将要被排序:
+        onWillAccept: (data) {
+          setState(() {
+            isWillOrder = true;
+            // 赋值图片ID:
+            targetId = asset.id;
+          });
+          return true;
+        },
+        onAccept: (AssetEntity data) {
+          // data为被拖拽的图片、asset为目标图片:
+          // 交换数组中的两个元素的位置:
+          final int index = selectedAssets.indexOf(data);
+          final targetIndex = selectedAssets.indexOf(asset);
+          selectedAssets[index] = selectedAssets[targetIndex];
+          selectedAssets[targetIndex] = data;
+
+          setState(() {
+            // 重置排序判断:
+            isWillOrder = false;
+            // 重置图片ID:
+            targetId = "";
+          });
+        },
+        onLeave: (data) {
+          setState(() {
+            isWillOrder = false;
+            targetId = "";
+          });
+        },
       ),
     );
   }
 
   /// 每一个小图片方块视图的样式:
-  Container _getImageItem(AssetEntity asset, double width,
+  Padding _getImageItem(AssetEntity asset, double width,
       {Animation<double>? opacity}) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(3),
-      ),
-      child: AssetEntityImage(
-        asset,
-        width: width,
-        height: width,
-        fit: BoxFit.cover,
-        isOriginal: false,
-        opacity: opacity,
+    return Padding(
+      padding: (isWillOrder && targetId == asset.id)
+          ? EdgeInsets.zero
+          : const EdgeInsets.all(imagePadding),
+      child: Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(3),
+          border: (isWillOrder && targetId == asset.id)
+              ? Border.all(color: accentColor, width: imagePadding)
+              : null,
+        ),
+        child: AssetEntityImage(
+          asset,
+          width: width,
+          height: width,
+          fit: BoxFit.cover,
+          isOriginal: false,
+          opacity: opacity,
+        ),
       ),
     );
   }
