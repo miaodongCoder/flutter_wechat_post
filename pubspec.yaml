@@ -34,8 +34,10 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
-  
+    
   wechat_assets_picker: ^8.4.1
+  extended_image: ^7.0.2
+
 
 
 dev_dependencies:

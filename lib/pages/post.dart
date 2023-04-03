@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat_post/utils/config.dart';
+import 'package:flutter_wechat_post/widgets/gallery.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class PostEditPage extends StatefulWidget {
@@ -56,18 +57,34 @@ class _PostEditPageState extends State<PostEditPage> {
   }
 
   // 图片项:
-  Container _buildPhotoItems(AssetEntity asset, double width) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(3),
-      ),
-      child: AssetEntityImage(
-        asset,
-        width: width,
-        height: width,
-        fit: BoxFit.cover,
-        isOriginal: false,
+  GestureDetector _buildPhotoItems(AssetEntity asset, double width) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return GalleryWidget(
+                initialindex: selectedAssets.indexOf(asset),
+                items: selectedAssets,
+                isBarVisible: false,
+              );
+            },
+          ),
+        );
+      },
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(3),
+        ),
+        child: AssetEntityImage(
+          asset,
+          width: width,
+          height: width,
+          fit: BoxFit.cover,
+          isOriginal: false,
+        ),
       ),
     );
   }
@@ -84,9 +101,11 @@ class _PostEditPageState extends State<PostEditPage> {
           ),
         );
 
+        // 空安全检查:
+        if (assets == null || assets.isEmpty) return;
         // 拿到图片:
         setState(() {
-          selectedAssets = assets?.toList() ?? [];
+          selectedAssets = assets.toList();
         });
       },
       child: Container(
