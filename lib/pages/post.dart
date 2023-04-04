@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_wechat_post/utils/config.dart';
+import 'package:flutter_wechat_post/utils/picker.dart';
 import 'package:flutter_wechat_post/widgets/gallery.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
@@ -183,22 +186,14 @@ class _PostEditPageState extends State<PostEditPage> {
   }
 
   // 添加图片按钮:
-  GestureDetector _buildAddButton(BuildContext context, double width) {
+  Widget _buildAddButton(BuildContext context, double width) {
     return GestureDetector(
       onTap: () async {
-        final List<AssetEntity>? assets = await AssetPicker.pickAssets(
-          context,
-          pickerConfig: AssetPickerConfig(
-            selectedAssets: selectedAssets,
-            maxAssets: maxAssets,
-          ),
-        );
-
-        // 空安全检查:
-        if (assets == null || assets.isEmpty) return;
-        // 拿到图片:
+        // 拍照:
+        final asset = await DuPicker.takePhoto(context);
+        if (asset == null) return;
         setState(() {
-          selectedAssets = assets.toList();
+          selectedAssets.add(asset);
         });
       },
       child: Container(

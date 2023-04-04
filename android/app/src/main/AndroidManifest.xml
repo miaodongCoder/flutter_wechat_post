@@ -6,6 +6,10 @@
     <user-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <user-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <user-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
    <application
         android:label="flutter_wechat_post"
         android:name="${applicationName}"

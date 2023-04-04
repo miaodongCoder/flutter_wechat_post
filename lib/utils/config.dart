@@ -7,3 +7,5 @@ const int maxAssets = 6;
 const Color accentColor = Colors.blue;
 // 图片边框宽度:
 const double imagePadding = 2;
+// 视频录制最大时间 秒
+const int maxVideoDuration = 30;
