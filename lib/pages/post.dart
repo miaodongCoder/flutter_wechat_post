@@ -1,10 +1,15 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:flutter_wechat_post/utils/config.dart';
-import 'package:flutter_wechat_post/utils/picker.dart';
+import 'package:flutter_wechat_post/utils/index.dart';
 import 'package:flutter_wechat_post/widgets/gallery.dart';
+import 'package:flutter_wechat_post/widgets/player.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+
+enum PostType {
+  image,
+  video,
+}
 
 class PostEditPage extends StatefulWidget {
   const PostEditPage({super.key});
@@ -24,6 +29,10 @@ class _PostEditPageState extends State<PostEditPage> {
   bool isWillOrder = false;
   // 被拖拽到的 target id:
   String targetId = "";
+  // 发布类型:
+  PostType? postType;
+  // 视频压缩文件:
+  CompressMediaFile? videoCompressFile;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +51,19 @@ class _PostEditPageState extends State<PostEditPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // 九宫格图片列表:
-        _buildPhotoList(),
+        if (postType == PostType.image) _buildPhotoList(),
+        if (postType == PostType.video)
+          VideoPlayerWidget(
+            initAsset: selectedAssets.first,
+            onCompletion: (file) {
+              videoCompressFile = file;
+            },
+          ),
+        if (postType == null && selectedAssets.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(spacing),
+            child: _buildAddButton(context, 130),
+          ),
       ],
     );
   }
@@ -193,8 +214,23 @@ class _PostEditPageState extends State<PostEditPage> {
         final asset = await DuPicker.takePhoto(context);
         if (asset == null) return;
         setState(() {
+          postType = PostType.image;
           selectedAssets.add(asset);
         });
+
+        /** 
+         * 
+        // 拍摄视频:
+        final video = await DuPicker.takeVideo(context);
+        if (video == null) return;
+        setState(() {
+          postType = PostType.video;
+          // 业务上暂时要求删除其他图片的样式:
+          selectedAssets.clear();
+          selectedAssets.add(video);
+        });
+
+        **/
       },
       child: Container(
         color: Colors.black12,
