@@ -24,114 +24,121 @@ class DuBottomSheet {
 
   /// 相册、相机:
   Widget _buildAssetCamera(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // 拍摄:
-        _buildButton(
-          const Text("拍摄"),
-          onTap: () {
-            DuPicker.showModalSheet(
-              context,
-              child: _buildMediaImageVideo(context, pickType: PickType.camera),
-            );
-          },
-        ),
-        const DividerWidget(),
-        // 相册:
-        _buildButton(
-          const Text("相册"),
-          onTap: () {
-            DuPicker.showModalSheet(
-              context,
-              child: _buildMediaImageVideo(context, pickType: PickType.asset),
-            );
-          },
-        ),
-        const DividerWidget(
-          height: 6,
-        ),
-        // 取消:
-        _buildButton(
-          const Text("取消"),
-          onTap: () {
-            Navigator.pop(context);
-          },
-        ),
-      ],
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 拍摄:
+          _buildButton(
+            const Text("拍摄"),
+            onTap: () {
+              DuPicker.showModalSheet(
+                context,
+                child:
+                    _buildMediaImageVideo(context, pickType: PickType.camera),
+              );
+            },
+          ),
+          const DividerWidget(),
+          // 相册:
+          _buildButton(
+            const Text("相册"),
+            onTap: () {
+              DuPicker.showModalSheet(
+                context,
+                child: _buildMediaImageVideo(context, pickType: PickType.asset),
+              );
+            },
+          ),
+          const DividerWidget(
+            height: 6,
+          ),
+          // 取消:
+          _buildButton(
+            const Text("取消"),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
     );
   }
 
   /// 图片、视频:
-  Widget _buildMediaImageVideo(BuildContext context,
-      {required PickType pickType}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // 图片:
-        _buildButton(
-          const Text("图片"),
-          onTap: () async {
-            List<AssetEntity>? result;
-            // 从相册选择:
-            if (pickType == PickType.asset) {
-              result = await DuPicker.assets(
+  Widget _buildMediaImageVideo(
+    BuildContext context, {
+    required PickType pickType,
+  }) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 图片:
+          _buildButton(
+            const Text("图片"),
+            onTap: () async {
+              List<AssetEntity>? result;
+              // 从相册选择:
+              if (pickType == PickType.asset) {
+                result = await DuPicker.assets(
+                    context: context,
+                    requestType: RequestType.image,
+                    selectedAssets: selectedAssets);
+              }
+              // 拍照:
+              else {
+                final photo = await DuPicker.takePhoto(context);
+                if (photo == null) return;
+                // 如果列表中之前没有照片:
+                if (selectedAssets == null) {
+                  result = [photo];
+                }
+                // 直接添加到列表中:
+                else {
+                  result = [...selectedAssets!, photo];
+                }
+              }
+
+              _popRoute(context, result: result);
+            },
+          ),
+          const DividerWidget(),
+          // 视频:
+          _buildButton(
+            const Text("视频"),
+            onTap: () async {
+              // 从相册里选择视频:
+              List<AssetEntity>? result;
+              if (pickType == PickType.asset) {
+                result = await DuPicker.assets(
                   context: context,
-                  requestType: RequestType.image,
-                  selectedAssets: selectedAssets);
-            }
-            // 拍照:
-            else {
-              final photo = await DuPicker.takePhoto(context);
-              if (photo == null) return;
-              // 如果列表中之前没有照片:
-              if (selectedAssets == null) {
+                  requestType: RequestType.video,
+                  selectedAssets: selectedAssets,
+                  maxAssets: 1,
+                );
+              }
+              // 拍视频:
+              else {
+                final AssetEntity? photo = await DuPicker.takePhoto(context);
+                if (photo == null) return;
                 result = [photo];
               }
-              // 直接添加到列表中:
-              else {
-                result = [...selectedAssets!, photo];
-              }
-            }
-
-            _popRoute(context, result: result);
-          },
-        ),
-        const DividerWidget(),
-        // 视频:
-        _buildButton(
-          const Text("视频"),
-          onTap: () async {
-            // 从相册里选择视频:
-            List<AssetEntity>? result;
-            if (pickType == PickType.asset) {
-              result = await DuPicker.assets(
-                context: context,
-                requestType: RequestType.video,
-                selectedAssets: selectedAssets,
-                maxAssets: 1,
-              );
-            }
-            // 拍视频:
-            else {
-              final AssetEntity? photo = await DuPicker.takePhoto(context);
-              if (photo == null) return;
-              result = [photo];
-            }
-            _popRoute(context, result: result);
-          },
-        ),
-        const DividerWidget(
-          height: 6,
-        ),
-        // 取消:
-        _buildButton(
-          const Text("取消"),
-          onTap: () {
-            _popRoute(context);
-          },
-        ),
-      ],
+              _popRoute(context, result: result);
+            },
+          ),
+          const DividerWidget(
+            height: 6,
+          ),
+          // 取消:
+          _buildButton(
+            const Text("取消"),
+            onTap: () {
+              _popRoute(context);
+            },
+          ),
+        ],
+      ),
     );
   }
 

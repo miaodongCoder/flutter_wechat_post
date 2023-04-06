@@ -47,9 +47,7 @@ class CameraPage extends StatelessWidget {
           );
         },
         // 生成规则:
-        imageAnalysisConfig: AnalysisConfig(
-          outputFormat: InputAnalysisImageFormat.jpeg, // 图像格式
-        ),
+        imageAnalysisConfig: AnalysisConfig(),
         // 经纬度:
         exifPreferences: ExifPreferences(
           saveGPSLocation: false,
