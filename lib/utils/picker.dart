@@ -46,4 +46,26 @@ class DuPicker {
     }));
     return result;
   }
+
+  /// 底部弹出框:
+  static Future<T?> showModalSheet<T>(
+    BuildContext context, {
+    Widget? child,
+  }) {
+    return showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10),
+          topRight: Radius.circular(10),
+        ),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          child: child,
+        );
+      },
+    );
+  }
 }
