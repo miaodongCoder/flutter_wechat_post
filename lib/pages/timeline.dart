@@ -27,8 +27,7 @@ class _TimeLinePageState extends State<TimeLinePage> {
           if (result == null || result.isEmpty) return;
           if (!mounted) return;
           // 把返回的图片数据传入导航中:
-          Navigator.push(
-            context,
+          Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
                 return PostEditPage(

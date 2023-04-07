@@ -11,3 +11,5 @@ const Color secondaryTextColor = Colors.black45;
 const double imagePadding = 2;
 // 视频录制最大时间 秒
 const int maxVideoDuration = 30;
+// 导航按钮边距:
+const double pagePadding = 12;

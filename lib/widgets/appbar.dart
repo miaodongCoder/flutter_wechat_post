@@ -1,44 +1,37 @@
 import 'package:flutter/material.dart';
 
-/// 本类为 `AppBar` 的弹出与收起的动画:
-class SliderAppBarWidget extends StatelessWidget
-    implements PreferredSizeWidget {
-  final PreferredSizeWidget child;
-  final AnimationController controller;
-  final bool visible;
-  const SliderAppBarWidget({
+class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
+  // 填充色:
+  final Color? backgroundColor;
+  // appbar下方的阴影大小:
+  final double? elevation;
+  // 返回按钮:
+  final Widget? leading;
+  // 右侧的按钮组:
+  final List<Widget>? actions;
+
+  const AppBarWidget({
     super.key,
-    required this.child,
-    required this.controller,
-    required this.visible,
+    this.backgroundColor,
+    this.elevation,
+    this.leading,
+    this.actions,
   });
 
   @override
-  Widget build(BuildContext context) {
-    visible ? controller.reverse() : controller.forward();
-    // 定义一个区间:
-    final Tween<Offset> tween = Tween<Offset>(
-      begin: Offset.zero,
-      // 结束为止是y轴收起到-1 位置:
-      end: const Offset(0, -1),
-    );
-
-    // 执行区间动画:
-    final Animation<Offset> position = tween.animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: Curves.fastOutSlowIn,
-      ),
-    );
-
-    return SlideTransition(
-      position: position,
-      child: child,
-    );
-  }
+  Size get preferredSize => const Size.fromHeight(30);
 
   @override
-  Size get preferredSize {
-    return child.preferredSize;
+  Widget build(BuildContext context) {
+    return _mainView(context);
+  }
+
+  AppBar _mainView(BuildContext context) {
+    return AppBar(
+      backgroundColor: backgroundColor ?? Colors.transparent,
+      elevation: elevation ?? 0,
+      leading: leading,
+      actions: actions,
+    );
   }
 }

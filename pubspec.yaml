@@ -36,7 +36,7 @@ dependencies:
     sdk: flutter
     
   # 图片相册:
-  wechat_assets_picker: ^8.4.1
+  wechat_assets_picker: 8.4.0
   # 路径:
   path_provider: ^2.0.14
   # 图片扩展组件:

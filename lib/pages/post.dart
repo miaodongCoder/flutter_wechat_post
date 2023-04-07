@@ -1,10 +1,10 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print, unused_field
 
 import 'package:flutter/material.dart';
+import 'package:flutter_wechat_post/entity/index.dart';
 import 'package:flutter_wechat_post/utils/index.dart';
-import 'package:flutter_wechat_post/widgets/gallery.dart';
-import 'package:flutter_wechat_post/widgets/player.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+import '../widgets/index.dart';
 
 enum PostType {
   image,
@@ -16,7 +16,11 @@ class PostEditPage extends StatefulWidget {
   // 发布类型:
   final PostType postType;
   final List<AssetEntity>? selectedAssets;
-  const PostEditPage({super.key, required this.postType, this.selectedAssets});
+  const PostEditPage({
+    super.key,
+    required this.postType,
+    this.selectedAssets,
+  });
 
   @override
   State<PostEditPage> createState() => _PostEditPageState();
@@ -37,6 +41,10 @@ class _PostEditPageState extends State<PostEditPage> {
   PostType? _postType;
   // 视频压缩文件:
   CompressMediaFile? _videoCompressFile;
+  // 内容输入控制器:
+  final TextEditingController _contentController = TextEditingController();
+
+  List<MenuItemModel> _menus = [];
 
   @override
   void initState() {
@@ -44,44 +52,131 @@ class _PostEditPageState extends State<PostEditPage> {
 
     _postType = widget.postType;
     _selectedAssets = widget.selectedAssets ?? [];
+    print("_selectedAssets = $_selectedAssets");
+    _menus = [
+      MenuItemModel(icon: Icons.location_on_outlined, title: "所在位置"),
+      MenuItemModel(icon: Icons.alternate_email_outlined, title: "提醒谁看"),
+      MenuItemModel(icon: Icons.person_outline, title: "谁可以看", right: "公开"),
+    ];
+  }
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("发布"),
+      appBar: AppBarWidget(
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back_ios_outlined,
+            color: Colors.black38,
+          ),
+        ),
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: pagePadding),
+            child: ElevatedButton(
+              onPressed: () {},
+              child: const Text("发布"),
+            ),
+          ),
+        ],
       ),
-      body: _mainView(),
+      body: _mainView(context),
       // 底部工具栏 Scaffold 脚手架已经帮忙做好了 , 只要设置显示与否的条件即可:
       bottomSheet: _isDragNow ? _buildRemoveBar() : null,
     );
   }
 
-  Widget _mainView() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // 九宫格图片列表:
-        if (_postType == PostType.image) _buildPhotoList(),
-        if (_postType == PostType.video)
-          VideoPlayerWidget(
-            initAsset: _selectedAssets.first,
-            onCompletion: (file) {
-              _videoCompressFile = file;
-            },
+  Widget _mainView(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(pagePadding),
+        child: Column(
+          children: [
+            // 输入框:
+            _buildContentInput(context),
+            // 九宫格图片列表:
+            if (_postType == PostType.image) _buildPhotoList(context),
+            if (_postType == PostType.video)
+              VideoPlayerWidget(
+                initAsset: _selectedAssets.first,
+                onCompletion: (file) {
+                  _videoCompressFile = file;
+                },
+              ),
+            if (_postType == null && _selectedAssets.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(spacing),
+                child: _buildAddButton(
+                  context,
+                  130,
+                ),
+              ),
+            _buildMenus(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 内容输入框:
+  Widget _buildContentInput(BuildContext context) {
+    return LimitedBox(
+      maxHeight: 180,
+      child: TextField(
+        maxLines: null,
+        maxLength: 20,
+        controller: _contentController,
+        decoration: InputDecoration(
+          hintText: "这一刻的想法...",
+          hintStyle: const TextStyle(
+            color: Colors.black12,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
           ),
-        if (_postType == null && _selectedAssets.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(spacing),
-            child: _buildAddButton(context, 130),
-          ),
-      ],
+          border: InputBorder.none,
+          counterText: _contentController.text.isEmpty ? "" : null,
+        ),
+        onChanged: (value) {
+          setState(() {});
+        },
+      ),
+    );
+  }
+
+  // 菜单项目:
+  Widget _buildMenus(BuildContext context) {
+    List<Widget> children = [];
+    children.add(const DividerWidget());
+    for (var menu in _menus) {
+      children.add(
+        ListTile(
+          leading: Icon(menu.icon),
+          title: Text(menu.title!),
+          trailing: Text(menu.right ?? ""),
+          onTap: menu.onTap,
+        ),
+      );
+      children.add(const DividerWidget());
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: 100),
+      child: Column(
+        children: children,
+      ),
     );
   }
 
   // 构建图片列表:
-  Widget _buildPhotoList() {
+  Widget _buildPhotoList(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(spacing),
       child: LayoutBuilder(
@@ -97,7 +192,10 @@ class _PostEditPageState extends State<PostEditPage> {
                 _buildPhotoItems(asset, width),
               // 2.按钮:
               if (_selectedAssets.length < maxAssets)
-                _buildAddButton(context, width),
+                _buildAddButton(
+                  context,
+                  width,
+                ),
             ],
           );
         },
@@ -219,23 +317,33 @@ class _PostEditPageState extends State<PostEditPage> {
   }
 
   // 添加图片按钮:
-  Widget _buildAddButton(BuildContext context, double width) {
+  Widget _buildAddButton(
+    BuildContext context,
+    double width,
+  ) {
+    print("外部_selectedAssets = $_selectedAssets");
     return GestureDetector(
       onTap: () async {
+        print("内部_selectedAssets = $_selectedAssets");
         final result = await DuBottomSheet(selectedAssets: _selectedAssets)
-            .wxPicker<List<AssetEntity>>(context);
+            .wxPicker<List<AssetEntity>>(
+          context,
+        );
         if (result == null || result.isEmpty) return;
         // 视频:
         if (result.length == 1 && result.first.type == AssetType.video) {
-          _postType = PostType.video;
+          setState(() {
+            _postType = PostType.video;
+            _selectedAssets = result;
+          });
         }
         //图片:
         else {
-          _postType = PostType.image;
+          setState(() {
+            _postType = PostType.image;
+            _selectedAssets = result;
+          });
         }
-        setState(() {
-          _selectedAssets = result;
-        });
       },
       child: Container(
         color: Colors.black12,
