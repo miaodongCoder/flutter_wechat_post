@@ -57,7 +57,8 @@ dependencies:
   video_player: 2.6.1
   # 底部弹出视图
   modal_bottom_sheet: 2.1.2
-
+  #dio 网络库
+  dio: 5.1.1
 
 
 

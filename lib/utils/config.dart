@@ -13,3 +13,5 @@ const double imagePadding = 2;
 const int maxVideoDuration = 30;
 // 导航按钮边距:
 const double pagePadding = 12;
+// Api 基地址:
+const String apiBaseUrl = "https://mock.apifox.cn/m1/2249037-0-default/";
