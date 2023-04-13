@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
+  final Text? title;
   // 填充色:
   final Color? backgroundColor;
   // appbar下方的阴影大小:
@@ -12,6 +13,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
 
   const AppBarWidget({
     super.key,
+    this.title,
     this.backgroundColor,
     this.elevation,
     this.leading,
@@ -32,6 +34,8 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       elevation: elevation ?? 0,
       leading: leading,
       actions: actions,
+      foregroundColor: Colors.white,
+      title: title,
     );
   }
 }

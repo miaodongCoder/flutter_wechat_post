@@ -15,7 +15,9 @@ class TimeLinePage extends StatefulWidget {
   State<TimeLinePage> createState() => _TimeLinePageState();
 }
 
-class _TimeLinePageState extends State<TimeLinePage> {
+// mixin防止界面退出后动画还在继续!
+class _TimeLinePageState extends State<TimeLinePage>
+    with SingleTickerProviderStateMixin {
   // 用户资料:
   UserModel? _user;
   // 时间线:
@@ -23,19 +25,52 @@ class _TimeLinePageState extends State<TimeLinePage> {
   // 滚动控制器:
   final ScrollController _scrollController = ScrollController();
   Color? _appBarColor;
+  double _elevation = 0;
+  Text? _title;
+  // 层管理:
+  OverlayState? _overlayState;
+  // 遮罩层:
+  OverlayEntry? _overlayEntry;
+  // 更多按钮位置 offset:
+  Offset _buttonOffset = Offset.zero;
+  // 动画:
+  late final AnimationController _animationController;
+  late Animation<double> _sizeTween;
 
   @override
   void initState() {
     super.initState();
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels > 200) {
+      double pixels = _scrollController.position.pixels;
+      if (pixels < 0) pixels = 0;
+      if (pixels > 200) {
         _appBarColor = Colors.black87;
+        _elevation = 1;
+        _title = const Text("朋友圈");
       } else {
         _appBarColor = null;
+        if (pixels > 150) {
+          _elevation = pixels / 200;
+        } else {
+          _elevation = 0;
+        }
+        _title = null;
       }
       setState(() {});
     });
+
+    // 初始化层:
+    _overlayState = Overlay.of(context);
+    // 初始化动画控制器:
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _sizeTween = Tween(begin: 0.0, end: 160.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
     _user = UserModel(
       uid: "0000",
@@ -46,6 +81,13 @@ class _TimeLinePageState extends State<TimeLinePage> {
     );
 
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future _loadData() async {
@@ -62,7 +104,9 @@ class _TimeLinePageState extends State<TimeLinePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBarWidget(
+        title: _title,
         backgroundColor: _appBarColor,
+        elevation: _elevation,
         actions: [
           GestureDetector(
             onTap: _onPublish,
@@ -213,8 +257,10 @@ class _TimeLinePageState extends State<TimeLinePage> {
     );
   }
 
+  // 列表项:
   Widget? _buildListItem(TimelineModel item) {
     int imgCount = item.images?.length ?? 0;
+    GlobalKey buttonKey = GlobalKey();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -294,13 +340,40 @@ class _TimeLinePageState extends State<TimeLinePage> {
                   color: Colors.black54,
                 ),
               ),
-              // 5.时间:
-              Text(
-                item.publishDate ?? "",
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Colors.black54,
-                ),
+              // 5.时间、更多按钮:
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // 5.1 时间:
+                  Text(
+                    item.publishDate ?? "",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  // 5.3 更多按钮:
+                  GestureDetector(
+                    onTap: () {
+                      // 获取按钮位置:
+                      _getMoreButtonOffset(buttonKey);
+                      // 显示遮罩层:
+                      _onShowMenu(onTap: _onCloseMenu);
+                    },
+                    child: Container(
+                      key: buttonKey,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: const Icon(
+                        Icons.more_horiz,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SpaceVerticalWidget(),
             ],
@@ -308,6 +381,112 @@ class _TimeLinePageState extends State<TimeLinePage> {
         ),
       ],
     );
+  }
+
+  // 显示菜单:
+  void _onShowMenu({Function()? onTap}) {
+    _overlayEntry = OverlayEntry(builder: (BuildContext context) {
+      return Positioned(
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Stack(children: [
+            // 遮罩:
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              color: Colors.black.withOpacity(.4),
+            ),
+            // 菜单:
+            AnimatedBuilder(
+              animation: _animationController,
+              builder: (BuildContext context, Widget? child) {
+                return Positioned(
+                  left: _buttonOffset.dx - _sizeTween.value - 10,
+                  top: _buttonOffset.dy - 10,
+                  child: SizedBox(
+                    width: _sizeTween.value,
+                    height: 40,
+                    child: _buildIsLikeMenu(),
+                  ),
+                );
+              },
+            ),
+          ]),
+        ),
+      );
+    });
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_animationController.status == AnimationStatus.dismissed) {
+        _animationController.forward();
+      }
+    });
+
+    if (_overlayEntry == null) return;
+    _overlayState?.insert(_overlayEntry!);
+  }
+
+  // 是否喜欢菜单:
+  Widget _buildIsLikeMenu() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black87,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              if (constraints.maxWidth > 80)
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.favorite,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                  label: Text(
+                    "点赞",
+                    style: textStylePopMenu,
+                  ),
+                ),
+              if (constraints.maxWidth >= 150)
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                  label: Text(
+                    "评论",
+                    style: textStylePopMenu,
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // 获取更多按钮位置 offset:
+  void _getMoreButtonOffset(GlobalKey key) {
+    final RenderBox? renderBox =
+        key.currentContext?.findRenderObject() as RenderBox?;
+    final Offset offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+    _buttonOffset = offset;
+  }
+
+  // 关闭菜单:
+  Future<void> _onCloseMenu() async {
+    if (_animationController.status != AnimationStatus.completed) return;
+    await _animationController.reverse();
+    _overlayEntry?.remove();
+    _overlayEntry?.dispose();
   }
 
   // 发布事件:
