@@ -36,10 +36,8 @@ class DuPicker {
   }
 
   // 拍摄的私有方法:
-  static Future<AssetEntity?> _getPictureWithCaptureMode(
-      BuildContext context, CaptureMode captureMode) async {
-    final result = await Navigator.of(context)
-        .push<AssetEntity?>(MaterialPageRoute(builder: (context) {
+  static Future<AssetEntity?> _getPictureWithCaptureMode(BuildContext context, CaptureMode captureMode) async {
+    final result = await Navigator.of(context).push<AssetEntity?>(MaterialPageRoute(builder: (context) {
       return CameraPage(
         captureMode: captureMode,
       );

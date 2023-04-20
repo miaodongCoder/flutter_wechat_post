@@ -34,8 +34,7 @@ class DuBottomSheet {
             onTap: () {
               DuPicker.showModalSheet(
                 context,
-                child:
-                    _buildMediaImageVideo(context, pickType: PickType.camera),
+                child: _buildMediaImageVideo(context, pickType: PickType.camera),
               );
             },
           ),
@@ -81,10 +80,7 @@ class DuBottomSheet {
               List<AssetEntity>? result;
               // 从相册选择:
               if (pickType == PickType.asset) {
-                result = await DuPicker.assets(
-                    context: context,
-                    requestType: RequestType.image,
-                    selectedAssets: selectedAssets);
+                result = await DuPicker.assets(context: context, requestType: RequestType.image, selectedAssets: selectedAssets);
               }
               // 拍照:
               else {

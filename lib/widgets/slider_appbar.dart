@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// 本类为 `AppBar` 的弹出与收起的动画:
-class SliderAppBarWidget extends StatelessWidget
-    implements PreferredSizeWidget {
+class SliderAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final PreferredSizeWidget child;
   final AnimationController controller;
   final bool visible;

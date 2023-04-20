@@ -25,8 +25,7 @@ class GalleryWidget extends StatefulWidget {
 }
 
 /* SingleTickerProviderStateMixin 防止界面外动画 */
-class _GalleryWidgetState extends State<GalleryWidget>
-    with SingleTickerProviderStateMixin {
+class _GalleryWidgetState extends State<GalleryWidget> with SingleTickerProviderStateMixin {
   bool visible = true;
   // 动画控制器:
   late final AnimationController controller;

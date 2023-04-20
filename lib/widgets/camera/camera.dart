@@ -23,9 +23,7 @@ class CameraPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: CameraAwesomeBuilder.custom(
-        saveConfig: captureMode == CaptureMode.photo
-            ? SaveConfig.photo(pathBuilder: _buildFilePath)
-            : SaveConfig.video(pathBuilder: _buildFilePath),
+        saveConfig: captureMode == CaptureMode.photo ? SaveConfig.photo(pathBuilder: _buildFilePath) : SaveConfig.video(pathBuilder: _buildFilePath),
         builder: (cameraState, previewSize, rect) {
           return cameraState.when(
             // 拍照:

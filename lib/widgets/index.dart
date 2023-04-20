@@ -6,3 +6,4 @@ export 'camera/camera.dart';
 export 'player.dart';
 export 'divider.dart';
 export 'appbar.dart';
+export 'text.dart';

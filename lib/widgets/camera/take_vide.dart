@@ -63,13 +63,11 @@ class _TakeVideoPageState extends State<TakeVideoPage> {
             // 拍摄按钮
             AwesomeCaptureButton(state: widget.cameraState),
             // 倒计时
-            if (widget.cameraState is VideoRecordingCameraState &&
-                widget.maxVideoDuration != null)
+            if (widget.cameraState is VideoRecordingCameraState && widget.maxVideoDuration != null)
               Countdown(
                 time: widget.maxVideoDuration!,
                 callback: () {
-                  (widget.cameraState as VideoRecordingCameraState)
-                      .stopRecording();
+                  (widget.cameraState as VideoRecordingCameraState).stopRecording();
                 },
               )
             else

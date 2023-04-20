@@ -10,24 +10,26 @@ class TimelineModel {
   UserModel? user;
   String? publishDate;
   String? location;
+  bool? isLike;
 
-  TimelineModel(
-      {this.id,
-      this.images,
-      this.video,
-      this.content,
-      this.postType,
-      this.user,
-      this.publishDate,
-      this.location});
+  TimelineModel({
+    this.id,
+    this.images,
+    this.video,
+    this.content,
+    this.postType,
+    this.user,
+    this.publishDate,
+    this.location,
+    this.isLike,
+  });
 
   TimelineModel.fromJson(Map<String, dynamic> json) {
     if (json["id"] is String) {
       id = json["id"];
     }
     if (json["images"] is List) {
-      images =
-          json["images"] == null ? null : List<String>.from(json["images"]);
+      images = json["images"] == null ? null : List<String>.from(json["images"]);
     }
     if (json["video"] is Map) {
       video = json["video"] == null ? null : VideoModel.fromJson(json["video"]);
@@ -47,6 +49,9 @@ class TimelineModel {
     if (json["location"] is String) {
       location = json["location"];
     }
+    if (json["is_like"] is bool) {
+      isLike = json["is_like"];
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -65,6 +70,7 @@ class TimelineModel {
     }
     data["publishDate"] = publishDate;
     data["location"] = location;
+    data["is_like"] = isLike;
     return data;
   }
 }

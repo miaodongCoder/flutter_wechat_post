@@ -16,16 +16,11 @@ class TimeLinePage extends StatefulWidget {
 }
 
 // mixin防止界面退出后动画还在继续!
-class _TimeLinePageState extends State<TimeLinePage>
-    with SingleTickerProviderStateMixin {
+class _TimeLinePageState extends State<TimeLinePage> with SingleTickerProviderStateMixin {
   // 用户资料:
   UserModel? _user;
   // 时间线:
   List<TimelineModel> _items = [];
-  // 滚动控制器:
-  final ScrollController _scrollController = ScrollController();
-  Color? _appBarColor;
-  double _elevation = 0;
   Text? _title;
   // 层管理:
   OverlayState? _overlayState;
@@ -33,19 +28,30 @@ class _TimeLinePageState extends State<TimeLinePage>
   OverlayEntry? _overlayEntry;
   // 更多按钮位置 offset:
   Offset _buttonOffset = Offset.zero;
-  // 动画:
+  // 动画控制器:
   late final AnimationController _animationController;
+  // 动画本身: (监听的操作放到了动画的`builder`方法里了~)
   late Animation<double> _sizeTween;
-
+  // 滚动控制器:
+  final ScrollController _scrollController = ScrollController();
+  // 头部appbar的背景色:
+  Color? _appBarColor;
+  double _elevation = 0;
+  // 当前正在操作的cellItem:
+  // TimelineModel? _currentItem;
   @override
   void initState() {
     super.initState();
 
+    // 监听滚动控制器:
     _scrollController.addListener(() {
       double pixels = _scrollController.position.pixels;
       if (pixels < 0) pixels = 0;
       if (pixels > 200) {
-        _appBarColor = Colors.black87;
+        double opacity = (pixels - 200) / 100;
+        if (opacity < 0.85) {
+          _appBarColor = Colors.black.withOpacity(opacity);
+        }
         _elevation = 1;
         _title = const Text("朋友圈");
       } else {
@@ -57,6 +63,7 @@ class _TimeLinePageState extends State<TimeLinePage>
         }
         _title = null;
       }
+
       setState(() {});
     });
 
@@ -75,8 +82,7 @@ class _TimeLinePageState extends State<TimeLinePage>
     _user = UserModel(
       uid: "0000",
       nickname: "小苗晓雪~",
-      avator:
-          "http://n.sinaimg.cn/translate/274/w937h937/20181121/w3_3-hnyuqhi6990881.jpg",
+      avator: "http://n.sinaimg.cn/translate/274/w937h937/20181121/w3_3-hnyuqhi6990881.jpg",
       cover: "images/flower.png",
     );
 
@@ -291,30 +297,17 @@ class _TimeLinePageState extends State<TimeLinePage>
                 ),
               ),
               const SpaceVerticalWidget(),
-              // 2.正文:
-              Text(
-                item.content ?? "",
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Colors.black54,
-                ),
-              ),
+              // 2.内容:
+              TextMaxLinesWidget(content: item.content ?? ""),
               const SpaceVerticalWidget(),
-              // 3.九宫格图片:
-              // 动态计算用LayoutBuilder:
+              // 3.九宫格图片(动态计算用LayoutBuilder):
               LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
                   double imgWidth = imgCount == 1
                       ? constraints.maxWidth * 0.7
                       : imgCount == 2
-                          ? (constraints.maxWidth -
-                                  spacing * 2 -
-                                  imagePadding * 1 * 2) /
-                              2
-                          : (constraints.maxWidth -
-                                  spacing * 2 -
-                                  imagePadding * 2 * 3) /
-                              3;
+                          ? (constraints.maxWidth - spacing * 2 - imagePadding * 1 * 2) / 2
+                          : (constraints.maxWidth - spacing * 2 - imagePadding * 2 * 3) / 3;
                   return Wrap(
                     spacing: spacing,
                     runSpacing: spacing,
@@ -358,7 +351,7 @@ class _TimeLinePageState extends State<TimeLinePage>
                       // 获取按钮位置:
                       _getMoreButtonOffset(buttonKey);
                       // 显示遮罩层:
-                      _onShowMenu(onTap: _onCloseMenu);
+                      _onShowMenu(onTap: _onCloseMenu, item: item);
                     },
                     child: Container(
                       key: buttonKey,
@@ -384,7 +377,7 @@ class _TimeLinePageState extends State<TimeLinePage>
   }
 
   // 显示菜单:
-  void _onShowMenu({Function()? onTap}) {
+  void _onShowMenu({Function()? onTap, TimelineModel? item}) {
     _overlayEntry = OverlayEntry(builder: (BuildContext context) {
       return Positioned(
         top: 0,
@@ -409,7 +402,7 @@ class _TimeLinePageState extends State<TimeLinePage>
                   child: SizedBox(
                     width: _sizeTween.value,
                     height: 40,
-                    child: _buildIsLikeMenu(),
+                    child: _buildIsLikeMenu(item: item),
                   ),
                 );
               },
@@ -429,7 +422,8 @@ class _TimeLinePageState extends State<TimeLinePage>
   }
 
   // 是否喜欢菜单:
-  Widget _buildIsLikeMenu() {
+  Widget _buildIsLikeMenu({TimelineModel? item}) {
+    bool? isLike = (item?.isLike == true);
     return Container(
       decoration: BoxDecoration(
         color: Colors.black87,
@@ -442,14 +436,16 @@ class _TimeLinePageState extends State<TimeLinePage>
             children: [
               if (constraints.maxWidth > 80)
                 TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(
+                  onPressed: () {
+                    _onLike(item);
+                  },
+                  icon: Icon(
                     Icons.favorite,
                     size: 18,
-                    color: Colors.white,
+                    color: isLike ? Colors.red : Colors.white,
                   ),
                   label: Text(
-                    "点赞",
+                    isLike ? "取消" : "点赞",
                     style: textStylePopMenu,
                   ),
                 ),
@@ -475,8 +471,7 @@ class _TimeLinePageState extends State<TimeLinePage>
 
   // 获取更多按钮位置 offset:
   void _getMoreButtonOffset(GlobalKey key) {
-    final RenderBox? renderBox =
-        key.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? renderBox = key.currentContext?.findRenderObject() as RenderBox?;
     final Offset offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
     _buttonOffset = offset;
   }
@@ -491,22 +486,37 @@ class _TimeLinePageState extends State<TimeLinePage>
 
   // 发布事件:
   void _onPublish() async {
-    final selectedAssets =
-        await DuBottomSheet().wxPicker<List<AssetEntity>>(context);
+    final selectedAssets = await DuBottomSheet().wxPicker<List<AssetEntity>>(context);
     if (selectedAssets == null || selectedAssets.isEmpty || !mounted) return;
     // 把输入的内容压入界面:
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
           return PostEditPage(
-            postType: (selectedAssets.length == 1 &&
-                    selectedAssets.first.type == AssetType.video)
-                ? PostType.video
-                : PostType.image,
+            postType: (selectedAssets.length == 1 && selectedAssets.first.type == AssetType.video) ? PostType.video : PostType.image,
             selectedAssets: selectedAssets,
           );
         },
       ),
     );
+  }
+
+  // 点赞操作:
+  void _onLike(TimelineModel? item) async {
+    if (item == null) return;
+    // 这里加不加await都可以 , 因为这是一个很小的接口请求操作, 不要因为这一点的接口响应速度影响用户点赞的流畅度~
+    // 但是实际来说我还是觉得这样不合理~因为这既然是一个小接口那基本上不会影响用户的操作 , 如果接口响应失败还要做其它的处理~
+    try {
+      await TimelineApi.like(item.id!);
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      setState(() {
+        item.isLike = !(item.isLike!);
+      });
+      Future.delayed(const Duration(milliseconds: 150), () {
+        _onCloseMenu();
+      });
+    }
   }
 }

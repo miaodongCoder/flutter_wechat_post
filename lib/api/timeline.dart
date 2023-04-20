@@ -5,11 +5,22 @@ import 'package:flutter_wechat_post/utils/index.dart';
 class TimelineApi {
   /// 分页数据:
   static Future<List<TimelineModel>> pageList() async {
-    var result = await WxHttpUtil().get('timeline/news');
+    var result = await WxHttpUtil().get(
+      'timeline/news',
+    );
     List<TimelineModel> list = [];
     for (var item in result.data) {
       list.add(TimelineModel.fromJson(item));
     }
     return list;
+  }
+
+  /// 点赞:
+  static Future like(String id) async {
+    var result = await WxHttpUtil().post(
+      'timeline/$id/like',
+      data: {},
+    );
+    return result;
   }
 }

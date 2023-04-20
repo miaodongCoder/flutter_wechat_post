@@ -181,15 +181,13 @@ class _PostEditPageState extends State<PostEditPage> {
       padding: const EdgeInsets.all(spacing),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          final double width =
-              (constraints.maxWidth - spacing * 2 - imagePadding * 2 * 3) / 3;
+          final double width = (constraints.maxWidth - spacing * 2 - imagePadding * 2 * 3) / 3;
           return Wrap(
             spacing: spacing,
             runSpacing: spacing,
             children: [
               // 1.图片:
-              for (AssetEntity asset in _selectedAssets)
-                _buildPhotoItems(asset, width),
+              for (AssetEntity asset in _selectedAssets) _buildPhotoItems(asset, width),
               // 2.按钮:
               if (_selectedAssets.length < maxAssets)
                 _buildAddButton(
@@ -290,19 +288,14 @@ class _PostEditPageState extends State<PostEditPage> {
   }
 
   /// 每一个小图片方块视图的样式:
-  Padding _getImageItem(AssetEntity asset, double width,
-      {Animation<double>? opacity}) {
+  Padding _getImageItem(AssetEntity asset, double width, {Animation<double>? opacity}) {
     return Padding(
-      padding: (_isWillOrder && targetId == asset.id)
-          ? EdgeInsets.zero
-          : const EdgeInsets.all(imagePadding),
+      padding: (_isWillOrder && targetId == asset.id) ? EdgeInsets.zero : const EdgeInsets.all(imagePadding),
       child: Container(
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(3),
-          border: (_isWillOrder && targetId == asset.id)
-              ? Border.all(color: accentColor, width: imagePadding)
-              : null,
+          border: (_isWillOrder && targetId == asset.id) ? Border.all(color: accentColor, width: imagePadding) : null,
         ),
         child: AssetEntityImage(
           asset,
@@ -325,8 +318,7 @@ class _PostEditPageState extends State<PostEditPage> {
     return GestureDetector(
       onTap: () async {
         print("内部_selectedAssets = $_selectedAssets");
-        final result = await DuBottomSheet(selectedAssets: _selectedAssets)
-            .wxPicker<List<AssetEntity>>(
+        final result = await DuBottomSheet(selectedAssets: _selectedAssets).wxPicker<List<AssetEntity>>(
           context,
         );
         if (result == null || result.isEmpty) return;
