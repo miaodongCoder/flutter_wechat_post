@@ -1,6 +1,7 @@
-import 'package:flutter_wechat_post/entity/index.dart';
+import 'index.dart';
 
 /// 朋友圈动态数据:
+
 class TimelineModel {
   String? id;
   List<String>? images;
@@ -11,6 +12,8 @@ class TimelineModel {
   String? publishDate;
   String? location;
   bool? isLike;
+  List<LikeModel>? likes;
+  List<CommentModel>? comments;
 
   TimelineModel({
     this.id,
@@ -22,36 +25,23 @@ class TimelineModel {
     this.publishDate,
     this.location,
     this.isLike,
+    this.likes,
+    this.comments,
   });
 
   TimelineModel.fromJson(Map<String, dynamic> json) {
-    if (json["id"] is String) {
-      id = json["id"];
-    }
-    if (json["images"] is List) {
-      images = json["images"] == null ? null : List<String>.from(json["images"]);
-    }
-    if (json["video"] is Map) {
-      video = json["video"] == null ? null : VideoModel.fromJson(json["video"]);
-    }
-    if (json["content"] is String) {
-      content = json["content"];
-    }
-    if (json["post_type"] is String) {
-      postType = json["post_type"];
-    }
-    if (json["user"] is Map) {
-      user = json["user"] == null ? null : UserModel.fromJson(json["user"]);
-    }
-    if (json["publishDate"] is String) {
-      publishDate = json["publishDate"];
-    }
-    if (json["location"] is String) {
-      location = json["location"];
-    }
-    if (json["is_like"] is bool) {
-      isLike = json["is_like"];
-    }
+    id = json["id"];
+    images = json["images"] == null ? null : List<String>.from(json["images"]);
+    video = json["video"] == null ? null : VideoModel.fromJson(json["video"]);
+    content = json["content"];
+    postType = json["post_type"];
+    user = json["user"] == null ? null : UserModel.fromJson(json["user"]);
+    publishDate = json["publishDate"];
+    location = json["location"];
+    isLike = json["is_like"];
+    likes = json["likes"] == null ? null : (json["likes"] as List).map((e) => LikeModel.fromJson(e)).toList();
+    comments =
+        json["comments"] == null ? null : (json["comments"] as List).map((e) => CommentModel.fromJson(e)).toList();
   }
 
   Map<String, dynamic> toJson() {
@@ -71,6 +61,12 @@ class TimelineModel {
     data["publishDate"] = publishDate;
     data["location"] = location;
     data["is_like"] = isLike;
+    if (likes != null) {
+      data["likes"] = likes?.map((e) => e.toJson()).toList();
+    }
+    if (comments != null) {
+      data["comments"] = comments?.map((e) => e.toJson()).toList();
+    }
     return data;
   }
 }

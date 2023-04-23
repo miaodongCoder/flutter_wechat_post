@@ -41,7 +41,7 @@ dependencies:
   path_provider: 2.0.14
   # 图片扩展组件:
   extended_image: 7.0.2
-  # uuid
+  # uuid:
   uuid: 3.0.7
   # 摄像头拍摄
   camerawesome: 1.4.0
@@ -55,10 +55,13 @@ dependencies:
   chewie: 1.4.0
   # VideoPlayer:
   video_player: 2.6.1
-  # 底部弹出视图
+  # 底部弹出视图:
   modal_bottom_sheet: 2.1.2
-  #dio 网络库
+  #dio 网络库:
   dio: 5.1.1
+  # dio 网络请求日志:
+  pretty_dio_logger: ^1.3.1
+
 
 
 
