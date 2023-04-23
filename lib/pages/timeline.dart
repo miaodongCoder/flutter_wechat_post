@@ -308,7 +308,7 @@ class _TimeLinePageState extends State<TimeLinePage> with SingleTickerProviderSt
     );
   }
 
-  Padding _buildContent(TimelineModel item) {
+  Widget _buildContent(TimelineModel item) {
     int imgCount = item.images?.length ?? 0;
     GlobalKey buttonKey = GlobalKey();
     return Padding(
@@ -346,30 +346,67 @@ class _TimeLinePageState extends State<TimeLinePage> with SingleTickerProviderSt
                 // 2.内容:
                 TextMaxLinesWidget(content: item.content ?? ""),
                 const SpaceVerticalWidget(),
-                // 3.九宫格图片(动态计算用LayoutBuilder):
-                LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    double imgWidth = imgCount == 1
-                        ? constraints.maxWidth * 0.7
-                        : imgCount == 2
-                            ? (constraints.maxWidth - spacing * 2 - imagePadding * 1 * 2) / 2
-                            : (constraints.maxWidth - spacing * 2 - imagePadding * 2 * 3) / 3;
-                    return Wrap(
-                      spacing: spacing,
-                      runSpacing: spacing,
-                      children: item.images!.map((path) {
-                        return SizedBox(
-                          width: imgWidth,
-                          height: imgWidth,
-                          child: Image.network(
-                            DuTools.imageUrlFormat(path),
+                // 3.1 视频:
+                if (item.postType == '2')
+                  LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      double imgWidth = constraints.maxWidth * 0.7;
+                      return GestureDetector(
+                        onTap: () {
+                          _onGallery(item: item);
+                        },
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // 图:
+                            Image.network(
+                              DuTools.imageUrlFormat(
+                                item.video?.cover ?? "",
+                                width: 400,
+                              ),
+                              width: imgWidth,
+                              height: imgWidth,
+                              fit: BoxFit.cover,
+                            ),
+                            // 播放图标:
+                            const Positioned(
+                              child: Icon(
+                                Icons.play_circle_fill_outlined,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                // 3.2:九宫格图片(动态计算用LayoutBuilder):
+                if (item.postType == '1')
+                  LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      double imgWidth = imgCount == 1
+                          ? constraints.maxWidth * 0.7
+                          : imgCount == 2
+                              ? (constraints.maxWidth - spacing * 2 - imagePadding * 1 * 2) / 2
+                              : (constraints.maxWidth - spacing * 2 - imagePadding * 2 * 3) / 3;
+                      return Wrap(
+                        spacing: spacing,
+                        runSpacing: spacing,
+                        children: item.images!.map((src) {
+                          return Image.network(
+                            DuTools.imageUrlFormat(
+                              src,
+                              width: imgCount == 1 ? 400 : null,
+                            ),
+                            width: imgWidth,
+                            height: imgWidth,
                             fit: BoxFit.cover,
-                          ),
-                        );
-                      }).toList(),
-                    );
-                  },
-                ),
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
                 const SpaceVerticalWidget(),
                 // 4.地理位置:
                 Text(
@@ -845,6 +882,22 @@ class _TimeLinePageState extends State<TimeLinePage> with SingleTickerProviderSt
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _onGallery({String? src, TimelineModel? item}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return GalleryWidget(
+            initialindex: src == null ? 1 : item?.images?.indexOf(src) ?? 1,
+            items: const [],
+            timeline: item,
+            isBarVisible: true,
+          );
+        },
       ),
     );
   }

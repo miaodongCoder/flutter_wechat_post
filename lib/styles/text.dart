@@ -6,3 +6,9 @@ var textStyleComment = const TextStyle(
   color: Colors.black54,
   fontWeight: FontWeight.w500,
 );
+
+var textStyleDetail = const TextStyle(
+  fontSize: 14.0,
+  color: Colors.white,
+  fontWeight: FontWeight.w500,
+);

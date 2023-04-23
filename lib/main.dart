@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wechat_post/global.dart';
 import 'pages/index.dart';
 
 void main() => runApp(const MyApp());
@@ -15,6 +16,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
       ),
       home: const TimeLinePage(),
+      navigatorObservers: [
+        Global.routeObserver,
+      ],
     );
   }
 }
