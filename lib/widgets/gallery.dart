@@ -242,7 +242,9 @@ class _GalleryWidgetState extends State<GalleryWidget>
       itemCount: widget.items.length,
       onPageChanged: (int index) {
         print("翻页: 第 $index 页~");
-        _currentPage = index + 1;
+        setState(() {
+          _currentPage = index + 1;
+        });
       },
       scrollDirection: Axis.horizontal,
       itemBuilder: (BuildContext context, int index) {
@@ -418,7 +420,9 @@ class _GalleryWidgetState extends State<GalleryWidget>
   Widget _buildImageByUrlsView() {
     return ExtendedImageGesturePageView.builder(
       onPageChanged: (int index) {
-        _currentPage = index + 1;
+        setState(() {
+          _currentPage = index + 1;
+        });
       },
       controller: ExtendedPageController(
         initialPage: widget.initialIndex,

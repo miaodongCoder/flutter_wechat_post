@@ -39,7 +39,7 @@ dependencies:
   wechat_assets_picker: 8.4.0
   # 路径:
   path_provider: 2.0.14
-  # 图片扩展组件:
+  # 图片扩展组件:(有左右滑动的图片组件)
   extended_image: 7.0.2
   # uuid:
   uuid: 3.0.7
