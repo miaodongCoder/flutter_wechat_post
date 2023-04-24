@@ -394,14 +394,20 @@ class _TimeLinePageState extends State<TimeLinePage> with SingleTickerProviderSt
                         spacing: spacing,
                         runSpacing: spacing,
                         children: item.images!.map((src) {
-                          return Image.network(
-                            DuTools.imageUrlFormat(
-                              src,
-                              width: imgCount == 1 ? 400 : null,
+                          return GestureDetector(
+                            onTap: () {
+                              // 跳转相册详情:
+                              _onGallery(src: src, item: item);
+                            },
+                            child: Image.network(
+                              DuTools.imageUrlFormat(
+                                src,
+                                width: imgCount == 1 ? 400 : null,
+                              ),
+                              width: imgWidth,
+                              height: imgWidth,
+                              fit: BoxFit.cover,
                             ),
-                            width: imgWidth,
-                            height: imgWidth,
-                            fit: BoxFit.cover,
                           );
                         }).toList(),
                       );
@@ -886,16 +892,18 @@ class _TimeLinePageState extends State<TimeLinePage> with SingleTickerProviderSt
     );
   }
 
+  // 跳转相册详情页:
   void _onGallery({String? src, TimelineModel? item}) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) {
           return GalleryWidget(
-            initialindex: src == null ? 1 : item?.images?.indexOf(src) ?? 1,
-            items: const [],
+            initialIndex: src == null ? 1 : item?.images?.indexOf(src) ?? 1,
             timeline: item,
+            items: const [],
             isBarVisible: true,
+            imgUrls: item?.images ?? [],
           );
         },
       ),

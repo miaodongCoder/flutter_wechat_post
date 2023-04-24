@@ -2,7 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
-  final Text? title;
+  final Widget? title;
   // 填充色:
   final Color? backgroundColor;
   // appbar下方的阴影大小:
@@ -44,6 +44,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       foregroundColor: Colors.white,
       title: title,
     );
+    // 导航栏进入和离开当前屏幕的动画:
     return (isAnimated == true)
         ? (isShow == true)
             ? FadeInDown(

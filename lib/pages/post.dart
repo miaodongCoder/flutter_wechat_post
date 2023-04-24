@@ -242,7 +242,7 @@ class _PostEditPageState extends State<PostEditPage> {
                 MaterialPageRoute(
                   builder: (context) {
                     return GalleryWidget(
-                      initialindex: _selectedAssets.indexOf(asset),
+                      initialIndex: _selectedAssets.indexOf(asset),
                       items: _selectedAssets,
                       isBarVisible: false,
                     );
