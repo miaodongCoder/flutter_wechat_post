@@ -263,13 +263,13 @@ class _PostEditPageState extends State<PostEditPage> {
           return true;
         },
         onAccept: (AssetEntity data) {
-          // data为被拖拽的图片、asset为目标图片:
-          // 交换数组中的两个元素的位置:
+          // data为被拖拽的图片、asset为目标位置的图片:
+          // 被拖拽的图片索引:
           final int index = _selectedAssets.indexOf(data);
+          // 目标位置的图片索引:
           final targetIndex = _selectedAssets.indexOf(asset);
-          _selectedAssets[index] = _selectedAssets[targetIndex];
-          _selectedAssets[targetIndex] = data;
-
+          _selectedAssets.removeAt(index);
+          _selectedAssets.insert(targetIndex, data);
           setState(() {
             // 重置排序判断:
             _isWillOrder = false;
